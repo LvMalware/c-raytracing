@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
             bitmap.pixels[i].r = bitmap.pixels[i].g = bitmap.pixels[i].b = 255;
         }
     }
-    bitmap_save_file("output.png", &bitmap);
+    bitmap_save_file("output.bmp", &bitmap);
     bitmap_image_destroy(&bitmap);
     return 0;
 }
