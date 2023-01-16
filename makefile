@@ -1,7 +1,7 @@
 OUTPUT=raycast
 SOURCES=main.c src/*.c
 INCLUDE=-Ilib
-CFLAGS=-Wall -Ofast $(INCLUDE) -o $(OUTPUT)
+CFLAGS=-Wall -Ofast $(INCLUDE) -o $(OUTPUT) -lm
 
 all:
 	$(CC) $(SOURCES) $(CFLAGS)
