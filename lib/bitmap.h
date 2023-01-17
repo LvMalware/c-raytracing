@@ -2,6 +2,7 @@
 #define __BITMAP_H
 
 #include <stdio.h>
+#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@ struct rgb_data {
     uint8_t g;
     uint8_t r;
 };
+
+static_assert(sizeof(struct rgb_data) == 3, "invalid struct rgb_data size");
 
 __attribute__((__packed__))
 struct bitmap_file_header {
@@ -50,5 +53,7 @@ void bitmap_image_init(struct bitmap_image * const, const uint32_t,
 void bitmap_image_header_init(struct bitmap_image_header * const,
                               const uint32_t, const uint32_t, const uint32_t);
 void bitmap_file_header_init(struct bitmap_file_header * const, const uint32_t);
+
+
 
 #endif /* bitmap.h */
