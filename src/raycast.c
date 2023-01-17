@@ -45,6 +45,15 @@ double intersect_cube(struct object * const cube,
 double intersect_plane(struct object * const plane,
                        struct point * const ray_origin,
                        struct point * const ray_direction) {
+    double t = -vdot(plane->normal.x, plane->normal.y, plane->normal.z,
+                     ray_origin->x - plane->center.x,
+                     ray_origin->y - plane->center.y,
+                     ray_origin->z - plane->center.z) /
+                vdot(plane->normal.x, plane->normal.y, plane->normal.z,
+                     ray_direction->x, ray_direction->y, ray_direction->z);
+    if (t >= 0) {
+        return t;
+    }
     return INFINITY;
 }
 
@@ -76,6 +85,29 @@ double intersect_sphere(struct object * const sphere,
 double intersect_cylinder(struct object * const cylinder,
                           struct point * const ray_origin,
                           struct point * const ray_direction) {
+    double a = vdot(ray_direction->x, ray_direction->y, ray_direction->z,
+                    ray_direction->x, ray_direction->y, ray_direction->z);
+    double b = 2 * vdot(ray_direction->x, ray_direction->y, ray_direction->z,
+                        ray_origin->x - cylinder->center.x,
+                        ray_origin->y - cylinder->center.y,
+                        ray_origin->z - cylinder->center.z);
+    double c = pow(vnorm(ray_origin->x - cylinder->center.x,
+                         ray_origin->y - cylinder->center.y,
+                         ray_origin->z - cylinder->center.z), 2) -
+               pow(cylinder->radius, 2);
+    double d = b * b - 4 * a * c;
+    if (d > 0) {
+        double t1 = (-b + sqrt(d)) / (2 * a);
+        double t2 = (-b - sqrt(d)) / (2 * a);
+        double y1 = ray_origin->x + t1 * ray_direction->x;
+        double y2 = ray_origin->x + t2 * ray_direction->x;
+        if (y1 > 0 && y1 < cylinder->height) {
+            if (t1 > 0) return t1;
+        }
+        if (y2 > 0 && y2 < cylinder->height) {
+            if (t2 > 0) return t2;
+        }
+    }
     return INFINITY;
 }
 
@@ -173,9 +205,9 @@ void scene_render(struct scene * const scene,
                 };
 
                 struct point normal_surface = {
-                    .x = intersection.x - scene->objects[i].center.x,
-                    .y = intersection.y - scene->objects[i].center.y,
-                    .z = intersection.z - scene->objects[i].center.z
+                    .x = intersection.x - scene->objects[obj].center.x,
+                    .y = intersection.y - scene->objects[obj].center.y,
+                    .z = intersection.z - scene->objects[obj].center.z
                 };
 
                 normalize(&normal_surface.x,
@@ -269,7 +301,7 @@ void scene_render(struct scene * const scene,
             image->pixels[pos].g = 255 * clip(color.g, 0, 1.0);
             image->pixels[pos].b = 255 * clip(color.b, 0, 1.0);
             /* if (image->pixels[pos].r != 0 || image->pixels[pos].g != 0 ||
-             *     image->pixels[pos].b != 0)
+                image->pixels[pos].b != 0)
                 printf("Pixel(%lu, %lu) = RGB(%d, %d, %d)\n", i, j,
                        image->pixels[pos].r, image->pixels[pos].g,
                        image->pixels[pos].b); */
@@ -277,6 +309,7 @@ void scene_render(struct scene * const scene,
         }
         px += step_x;
     }
+    printf("Done here?\n");
 }
 
 void scene_object(struct scene * const scene, struct object * const obj) {

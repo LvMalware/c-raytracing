@@ -16,10 +16,12 @@ struct color {
 
 struct object {
     double radius;
+    double height;
     double shineness;
     double reflection;
     unsigned char type;
     struct point center;
+    struct point normal;
     struct color ambient;
     struct color diffuse;
     struct color specular;
