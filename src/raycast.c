@@ -39,6 +39,29 @@ static inline void normalize(double * const x,
 double intersect_cube(struct object * const cube,
                       struct point * const ray_origin,
                       struct point * const ray_direction) {
+
+    double half = cube->height / 2;
+    double min_x = cube->center.x - half;
+    double min_y = cube->center.y - half;
+    double min_z = cube->center.z - half;
+    double max_x = cube->center.x + half;
+    double max_y = cube->center.y + half;
+    double max_z = cube->center.z + half;
+
+    double tx1 = (min_x - ray_origin->x) / ray_direction->x;
+    double tx2 = (max_x - ray_origin->x) / ray_direction->x;
+    double ty1 = (min_y - ray_origin->y) / ray_direction->y;
+    double ty2 = (max_y - ray_origin->y) / ray_direction->y;
+    double tz1 = (min_z - ray_origin->z) / ray_direction->z;
+    double tz2 = (max_z - ray_origin->z) / ray_direction->z;
+
+    double tmin = fmax(fmax(fmin(tx1, tx2), fmin(ty1, ty2)), fmin(tz1, tz2));
+    double tmax = fmin(fmin(fmax(tx1, tx2), fmax(ty1, ty2)), fmax(tz1, tz2));
+
+    if (tmin < tmax) {
+        if (tmin < 0) tmin = tmax;
+        if (tmin >= 0) return tmin;
+    }
     return INFINITY;
 }
 
@@ -51,9 +74,7 @@ double intersect_plane(struct object * const plane,
                      ray_origin->z - plane->center.z) /
                 vdot(plane->normal.x, plane->normal.y, plane->normal.z,
                      ray_direction->x, ray_direction->y, ray_direction->z);
-    if (t >= 0) {
-        return t;
-    }
+    if (t >= 0) return t;
     return INFINITY;
 }
 
@@ -74,7 +95,6 @@ double intersect_sphere(struct object * const sphere,
                pow(sphere->radius, 2);
     double d = b * b - 4 * a * c;
     if (d > 0) {
-        //printf("a=%lf b=%lf c=%lf delta=%lf\n", a, b, c, d);
         double t1 = (-b + sqrt(d)) / 2;
         double t2 = (-b - sqrt(d)) / 2;
         if (t1 > 0 && t2 > 0) return (t1 < t2) ? t1 : t2;
@@ -85,29 +105,7 @@ double intersect_sphere(struct object * const sphere,
 double intersect_cylinder(struct object * const cylinder,
                           struct point * const ray_origin,
                           struct point * const ray_direction) {
-    double a = vdot(ray_direction->x, ray_direction->y, ray_direction->z,
-                    ray_direction->x, ray_direction->y, ray_direction->z);
-    double b = 2 * vdot(ray_direction->x, ray_direction->y, ray_direction->z,
-                        ray_origin->x - cylinder->center.x,
-                        ray_origin->y - cylinder->center.y,
-                        ray_origin->z - cylinder->center.z);
-    double c = pow(vnorm(ray_origin->x - cylinder->center.x,
-                         ray_origin->y - cylinder->center.y,
-                         ray_origin->z - cylinder->center.z), 2) -
-               pow(cylinder->radius, 2);
-    double d = b * b - 4 * a * c;
-    if (d > 0) {
-        double t1 = (-b + sqrt(d)) / (2 * a);
-        double t2 = (-b - sqrt(d)) / (2 * a);
-        double y1 = ray_origin->x + t1 * ray_direction->x;
-        double y2 = ray_origin->x + t2 * ray_direction->x;
-        if (y1 > 0 && y1 < cylinder->height) {
-            if (t1 > 0) return t1;
-        }
-        if (y2 > 0 && y2 < cylinder->height) {
-            if (t2 > 0) return t2;
-        }
-    }
+
     return INFINITY;
 }
 
@@ -196,7 +194,6 @@ void scene_render(struct scene * const scene,
                                               scene->object_count,
                                               &origin, &direction,
                                               &obj, &dist)) break;
-                //printf("Intersection with object #%lu (distance: %lf)\n", obj, dist);
 
                 struct point intersection = {
                     .x = origin.x + dist * direction.x,
@@ -300,16 +297,11 @@ void scene_render(struct scene * const scene,
             image->pixels[pos].r = 255 * clip(color.r, 0, 1.0);
             image->pixels[pos].g = 255 * clip(color.g, 0, 1.0);
             image->pixels[pos].b = 255 * clip(color.b, 0, 1.0);
-            /* if (image->pixels[pos].r != 0 || image->pixels[pos].g != 0 ||
-                image->pixels[pos].b != 0)
-                printf("Pixel(%lu, %lu) = RGB(%d, %d, %d)\n", i, j,
-                       image->pixels[pos].r, image->pixels[pos].g,
-                       image->pixels[pos].b); */
+
             py += step_y;
         }
         px += step_x;
     }
-    printf("Done here?\n");
 }
 
 void scene_object(struct scene * const scene, struct object * const obj) {
