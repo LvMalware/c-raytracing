@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     scene_object(&scene, &(struct object) {
         .type = OBJECT_SPHERE,
         .center = { .x = -0.4, .y = 0, .z = 0.2 },
-        .radius = 0.22,
+        .radius = 0.2,
         .ambient = { .r = 0.7, .g = 0.7, .b = 0.7 },
         .diffuse = { .r = 0.7, .g = 0.7, .b = 0.0 },
         .specular = { .r = 1.0, .g = 1.0, .b = 1.0 },
@@ -98,38 +98,6 @@ int main(int argc, char *argv[]) {
         .reflection = 0
     });
 
-    scene_object(&scene, &(struct object) {
-        .type = OBJECT_SPHERE,
-        .center = { .x = -0.56, .y = -0.21, .z = 0.41 },
-        .radius = 0.02,
-        .ambient = { .r = 0.42, .g = 0.14, .b = 0 },
-        .diffuse = { .r = 0.42, .g = 0.14, .b = 0.0 },
-        .specular = { .r = 1.0, .g = 1.0, .b = 1.0 },
-        .shineness = 300,
-        .reflection = 0
-    });
-
-    scene_object(&scene, &(struct object) {
-        .type = OBJECT_SPHERE,
-        .center = { .x = -0.561, .y = -0.211, .z = 0.411 },
-        .radius = 0.02,
-        .ambient = { .r = 0.42, .g = 0.14, .b = 0 },
-        .diffuse = { .r = 0.42, .g = 0.14, .b = 0.0 },
-        .specular = { .r = 1.0, .g = 1.0, .b = 1.0 },
-        .shineness = 300,
-        .reflection = 0
-    });
-
-    scene_object(&scene, &(struct object) {
-        .type = OBJECT_SPHERE,
-        .center = { .x = -0.562, .y = -0.212, .z = 0.412 },
-        .radius = 0.02,
-        .ambient = { .r = 0.42, .g = 0.14, .b = 0 },
-        .diffuse = { .r = 0.42, .g = 0.14, .b = 0.0 },
-        .specular = { .r = 1.0, .g = 1.0, .b = 1.0 },
-        .shineness = 300,
-        .reflection = 0
-    });
 
     int i;
     double add = 0.001;
@@ -137,12 +105,12 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < 500; i ++) {
         scene_object(&scene, &(struct object) {
             .type = OBJECT_SPHERE,
-            .center = { .x = -(0.563 + add), .y = -(0.213 + add), .z = (0.413 + add) },
+            .center = { .x = -(0.56 + add), .y = -(0.21 + add), .z = (0.41 + add) },
             .radius = 0.02 + adr,
             .ambient = { .r = 0.42, .g = 0.14, .b = 0 },
             .diffuse = { .r = 0.42, .g = 0.14, .b = 0.0 },
             .specular = { .r = 1.0, .g = 1.0, .b = 1.0 },
-            .shineness = 300,
+            .shineness = 400,
             .reflection = 0
         });
         add += 0.001;
