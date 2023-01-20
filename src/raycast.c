@@ -103,11 +103,75 @@ double intersect_sphere(struct object * const sphere,
 }
 
 double intersect_cylinder(struct object * const cylinder,
-                          struct point * const ray_origin,
-                          struct point * const ray_direction) {
+                           struct point * const ray_origin,
+                           struct point * const ray_direction) {
+    double r  = cylinder->radius, h = cylinder->height;
+    double cx = cylinder->center.x,
+           cy = cylinder->center.y,
+           cz = cylinder->center.z;
+
+    double ox = ray_origin->x,
+           oy = ray_origin->y,
+           oz = ray_origin->z;
+
+    double dx = ray_direction->x,
+           dy = ray_direction->y,
+           dz = ray_direction->z;
+
+    double a = dx * dx + dy * dy;
+    double b = 2 * (dx * (ox - cx) + dy * (oy - cy));
+    double c = pow(ox - cx, 2) + pow(oy - cy, 2) - r * r;
+
+    double d = b * b - 4 * a * c;
+    if (d < 0) return INFINITY;
+    double t0 = (-b - sqrt(d)) / (2 * a);
+    double t1 = (-b + sqrt(d)) / (2 * a);
+
+    if (t1 < 0 || t0 < 0) return INFINITY;
+
+    double x0 = ox + t0 * dx;
+    double y0 = oy + t0 * dy;
+    double z0 = oz + t0 * dz;
+    double x1 = ox + t1 * dx;
+    double y1 = oy + t1 * dy;
+    double z1 = oz + t1 * dz;
+
+    /* check intersection using dot product with normal of the cylinder */
+    double dp0 = pow(x0 - cx, 2) + pow(y0 - cy, 2) + pow(z0 - cz, 2);
+    double dp1 = pow(x1 - cx, 2) + pow(y1 - cy, 2) + pow(z1 - cz, 2);
+    if (dp0 <= r * r && z0 <= cz + h && z0 >= cz) return t0;
+    if (dp1 <= r * r && z1 <= cz + h && z1 >= cz) return t0;
+
+    /* project intersection point on the cylinder axis */
+    double p0 = (x0 - cx) * dx + (y0 - cy) * dy;
+    double p1 = (x1 - cx) * dx + (y1 - cy) * dy;
+    if (p0 <= r && p0 >= -r && z0 <= cz + h && z0 >= cz) return t0;
+    if (p1 <= r && p1 >= -r && z1 <= cz + h && z1 >= cz) return t1;
+
+    if (dx == 0 && dy == 0) {
+        if (fabs(ox - cx) > r || oz > cz + h || oz < cz) return INFINITY;
+        return (cz - oz) / dz;
+    }
+
+    double t_cap0 = (cz + h - oz) / dz;
+
+    if (t_cap0 > t0 && t_cap0 < t1) {
+        double x = ox + t_cap0 * dx;
+        double y = oy + t_cap0 * dy;
+        if (pow(x - cx, 2) + pow(y - cy, 2) <= r * r) return t_cap0;
+    }
+
+    double t_cap1 = (cz - oz) / dz;
+    if (t_cap1 > t0 && t_cap1 < t1) {
+        double x = ox + t_cap1 * dx;
+        double y = oy + t_cap1 * dy;
+        if (pow(x - cx, 2) + pow(y - cy, 2) <= r * r) return t_cap1;
+    }
+
 
     return INFINITY;
 }
+
 
 int intersect_nearest_object(struct object * const objects, size_t count,
                               struct point * const ray_origin,
