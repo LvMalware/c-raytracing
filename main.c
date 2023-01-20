@@ -23,10 +23,10 @@
 int main(int argc, char *argv[]) {
     struct scene scene;
     struct bitmap_image image;
-    scene_create(&scene, 4*1080, 4*1080);
+    scene_create(&scene, 1080, 1080);
     scene.light.position = (struct point) { 0.5, 0.5, 9 };
     scene.camera = (struct point) { 1.5, 1, 4 };
-    scene.max_depth = 20;
+    scene.max_depth = 5;
 
     scene_object(&scene, &(struct object) {
         .type = OBJECT_PLANE,
