@@ -22,17 +22,62 @@
 #include "bitmap.h"
 #include "raycast.h"
 
+int help(char * const prog) {
+    printf("Usage: %s [options]\n\n", prog);
+    printf("Options:\n"
+            "   -h              Show this help message and exit\n"
+            "   -i              Input .toml file with scene description\n"
+            "   -o              Output .bmp file to save rendered scene\n\n");
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
+    char *input_file = "scene.toml";
+    char *output_file = "output.bmp";
+
+    char **arg = &argv[1];
+    while (*arg) {
+        if ((*arg)[0] == '-') {
+            switch ((*arg)[1]) {
+                case 'h':
+                    return help(argv[0]);
+                case 'i':
+                    input_file = *(++arg);
+                    continue;
+                case 'o':
+                    output_file = *(++arg);
+                    continue;
+                default:
+                    break;
+            }
+        }
+        arg ++;
+    }
+
+    if (input_file == NULL || input_file[0] == '-') {
+        printf("Missing input file (option -i)\n");
+        return 1;
+    }
+
+    if (output_file == NULL || output_file[0] == '-') {
+        printf("Missing output file (option -o)\n");
+        return 1;
+    }
+
     struct scene scene;
     struct bitmap_image image;
 
-    FILE *toml = fopen("scene.toml", "r");
+    FILE *toml = fopen(input_file, "r");
+    if (toml == NULL) {
+        printf("Error reading file '%s'\n", input_file);
+        return 1;
+    }
     scene2toml_read(&scene, toml);
     fclose(toml);
 
     scene_render(&scene, &image);
     scene_destroy(&scene);
-    bitmap_save_file("output.bmp", &image);
+    bitmap_save_file(output_file, &image);
     bitmap_image_destroy(&image);
 
     return 0;
